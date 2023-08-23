@@ -8,17 +8,17 @@ The choice of each of following is upto us and how well the chosen technology su
 - A database
 
 Does it run legends:
-- ~Y = Runs~, ~N = Doesn't Run~
-- ~X = Does't Run but could run in future~, ~? = Unchecked~
-| Platform             | Classic | WASM | Serverless |
-|----------------------+---------+------+------------|
-| OS/Container         | Y       | Y    | Y          |
-| Browser              | N       | Y    | N          |
-| CF Workers           | N       | X    | ?          |
-| Netlify Serverless F | N       | ?    | Y          |
-| Netlify Edge F       | N       | ?    | ?          |
-| Vercel Serverless F  | N       | ?    | Y          |
-| Vercel Edge F        | N       | ?    | ?          |
+- ~Y = Runs~, ~N = Doesn't Run~, ~O = Does't make sense to try~
+- ~X = Does't Run but could run in future~, ~? = Unchecked/Could be~
+| Platform             | Classic | WASM | Serverless | Transpiled |
+|----------------------+---------+------+------------+------------|
+| OS/Container         | Y       | Y    | Y          | O          |
+| Browser              | N       | Y    | N          | ?          |
+| CF Workers           | N       | X    | ?          | ?          |
+| Netlify Serverless F | N       | ?    | Y          | O          |
+| Netlify Edge F       | N       | ?    | ?          | ?          |
+| Vercel Serverless F  | N       | ?    | Y          | O          |
+| Vercel Edge F        | N       | ?    | ?          | ?          |
 
 ** Table of contents
 - [[#oscontainer][OS/Container]]
@@ -29,18 +29,15 @@ Does it run legends:
 - [[#aws][AWS]]
 
 ** OS/Container
-*** Description
-*** Attempts
-**** Classic
+*** Classic
 - This has been battle tested
 - This is something that is known to humankind since 2003.
 - This supports every architecture that php supports
-**** WASM
+*** WASM
 ** Browser
-*** Attempts
-**** Classic
+*** Classic
 - This is not possible because of browser limitations
-**** WASM
+*** WASM
 The WP team [[https://make.wordpress.org/core/2022/09/23/client-side-webassembly-wordpress-with-no-server/][came up]] around september'22, it's pretty neat. [[https://developer.wordpress.org/playground/][Try]] it out, it also has excellent [[https://wordpress.github.io/wordpress-playground/][documentation]]. The current WebAssembly Wordpress setup, in summary:
 - PHP
   - Runs as a WebAssembly binary [[https://github.com/WordPress/wordpress-playground/blob/trunk/packages/php-wasm/compile/Dockerfile][using php-wasm]] in a [[https://wordpress.github.io/wordpress-playground/architecture/browser-php-worker-threads/][worker thread]]
@@ -59,52 +56,49 @@ The WP team [[https://make.wordpress.org/core/2022/09/23/client-side-webassembly
   - Browser: Uses service worker
   - Node: Uses node-php-wasm bindings
 ** Cloudflare
-*** Description
-With cloudflare, we have cloudflare workers.
-**** Limits
-- Runtime
-  - Only JS and [[https://developers.cloudflare.com/workers/runtime-apis/webassembly/][WASM]]: Other languages [[https://community.cloudflare.com/t/will-cloudflare-support-a-php-runtime-for-workers-at-the-edge/56682/7][need process-level isolation]]
-- Memory
-  - [[https://developers.cloudflare.com/workers/platform/limits/#memory][Limits · Cloudflare Workers docs]]
-- Script size
-*** Attempts
-**** WASM
+This is mostly about CF workers. It is similar to ~Edge functions~ of ~Netlify~ and ~Vercel~. But CF doesn't seem to have a ~Serverless function~ equivalent of them, even though it [[https://www.cloudflare.com/learning/serverless/glossary/serverless-and-cloudflare-workers/][puts itself out]] as a [[https://blog.cloudflare.com/node-js-support-cloudflare-workers/][serverless]] platform.
+*** WASM
 - Currently this [[https://github.com/WordPress/wordpress-playground/issues/69][doesn't work out]] because of memory constraints.
-**** Classic
+*** Classic
 - Not possible as cloudflare workers does not work like containers
-**** Serverless
+*** Serverless
 - Since the runtime supports JS, we technically should be able to spawn a php interpreter out of the node application
 - Swpan
   - Unix spawn
   - Service bindings
   - Durable objects
-**** Transpile
+- There are certain issues about this usecase
+**** Limits
+- Script size
+- Isolation/Sandboxing: Does it allow spawning?
+- Runtime
+  - Only JS and [[https://developers.cloudflare.com/workers/runtime-apis/webassembly/][WASM]]: Other languages [[https://community.cloudflare.com/t/will-cloudflare-support-a-php-runtime-for-workers-at-the-edge/56682/7][need process-level isolation]]
+- Memory
+  - [[https://developers.cloudflare.com/workers/platform/limits/#memory][Limits · Cloudflare Workers docs]]
+*** Transpile
 - If in any case, the main language is not supported we could transpile the language to JS and try running it that way
-- Supported languages can be [[https://developers.cloudflare.com/workers/learning/languages/#compiled-to-javascript][found here]].
+- Supported languages that could be transpiled can be [[https://developers.cloudflare.com/workers/learning/languages/#compiled-to-javascript][found here]].
 ** Netlify
-*** Description
 - They have [[https://docs.netlify.com/functions/overview/][Serverless functions]] and [[https://docs.netlify.com/edge-functions/overview/][Edge Functions]]
 - Serverless setup is possible only w Serverless functions
-*** Attempts
-**** WASM
-**** Classic
+*** WASM
+- PHP wasm runtime: [[https://github.com/ascorbic/php-edge][ascorbic/php-edge]], this could be extended to run WP
+*** Classic
 - Not possible because no containers
-**** Serverless
+*** Serverless
 - [[https://github.com/mitchmac/ServerlessWP][ServerlessWP]]
 ** Vercel
-*** Description
 - They have [[https://vercel.com/docs/functions/serverless-functions][Serverless functions]] and [[https://vercel.com/docs/functions/edge-functions][Edge Functions]]
 - Serverless setup is possible only w Serverless functions
-*** Attempts
-**** Classic
+*** Classic
 - Not possible because no containers
-**** WASM
-**** Serverless
+*** WASM
+*** Serverless
 - [[https://github.com/mitchmac/ServerlessWP][ServerlessWP]]
 - PHP runtime: [[https://github.com/vercel-community/php][vercel-community/php]]
 ** AWS
-*** Attempts
-**** Serverless
+AWS can ofcourse run OS/Container style wordpress but some notes on serverless wordpress on AWS.
+*** Serverless
 - [[https://github.com/mitchmac/ServerlessWP][ServerlessWP]]
 - [[https://blog.ymirapp.com/serverless-wordpress-aws/][Serverless WordPress architecture on AWS | Ymir blog]]
   - WebServer
