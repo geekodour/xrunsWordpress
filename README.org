@@ -1,5 +1,5 @@
 * xrunsWordpress
-The choice of each of following is upto us and how well the chosen technology support the other technology is the stack.
+The choice of each of following is upto us and how well the chosen technology support the other technology is the stack. Even if things run they will have their own tradeoffs.
 
 - A runtime/environment/platform
 - A webserver/routing (can be nginx/nodejs/python/caddy anything)
@@ -7,16 +7,17 @@ The choice of each of following is upto us and how well the chosen technology su
 - Wordpress 
 - A database
 
-R = Runs
+- ~Y = Runs~, ~N = Doesn't Run~
+- ~X = Does't Run but could run in future~, ~? = Unchecked~
 | Platform             | Classic | WASM | Serverless |
 |----------------------+---------+------+------------|
-| OS/Container         | X       |      |            |
-| Browser              |         |      |            |
-| CF Workers           |         |      |            |
-| Netlify Serverless F |         |      |            |
-| Netlify Edge F       |         |      |            |
-| Vercel Serverless F  |         |      |            |
-| Vercel Edge F        |         |      |            |
+| OS/Container         | Y       | Y    | Y          |
+| Browser              | N       | Y    | N          |
+| CF Workers           | N       | X    | ?          |
+| Netlify Serverless F | N       | ?    | Y          |
+| Netlify Edge F       | N       | ?    | ?          |
+| Vercel Serverless F  | N       | ?    | Y          |
+| Vercel Edge F        | N       | ?    | ?          |
 
 ** Table of contents
 - [[#oscontainer][OS/Container]]
