@@ -7,6 +7,17 @@ The choice of each of following is upto us and how well the chosen technology su
 - Wordpress 
 - A database
 
+R = Runs
+| Platform             | Classic | WASM | Serverless |
+|----------------------+---------+------+------------|
+| OS/Container         | X       |      |            |
+| Browser              |         |      |            |
+| CF Workers           |         |      |            |
+| Netlify Serverless F |         |      |            |
+| Netlify Edge F       |         |      |            |
+| Vercel Serverless F  |         |      |            |
+| Vercel Edge F        |         |      |            |
+
 ** OS/Container
 *** Description
 *** Attempts
@@ -75,11 +86,12 @@ With cloudflare, we have cloudflare workers.
 - They have [[https://vercel.com/docs/functions/serverless-functions][Serverless functions]] and [[https://vercel.com/docs/functions/edge-functions][Edge Functions]]
 - Serverless setup is possible only w Serverless functions
 *** Attempts
-**** WASM
 **** Classic
 - Not possible because no containers
+**** WASM
 **** Serverless
 - [[https://github.com/mitchmac/ServerlessWP][ServerlessWP]]
+- PHP runtime: [[https://github.com/vercel-community/php][vercel-community/php]]
 ** AWS
 *** Attempts
 **** Serverless
