@@ -18,6 +18,14 @@ R = Runs
 | Vercel Serverless F  |         |      |            |
 | Vercel Edge F        |         |      |            |
 
+** Table of contents
+- [[#oscontainer][OS/Container]]
+- [[#browser][Browser]]
+- [[#cloudflare][Cloudflare]]
+- [[#netlify][Netlify]]
+- [[#vercel][Vercel]]
+- [[#aws][AWS]]
+
 ** OS/Container
 *** Description
 *** Attempts
