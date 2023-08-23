@@ -38,6 +38,9 @@ Does it run legends:
   - Eg. PHP runtime: [[https://github.com/brefphp/bref][bref]], [[https://github.com/mitchmac/serverlesswp-node][serverlesswp-node]], [[https://github.com/ymirapp/php-runtime][ymirphp]]
 - Database
   - Both MySQL and SQLite can be tried, MySQL being more standard. (SQLite passes 99% of the WordPress unit test suite)
+- Media Storage
+  - With Serverless WordPress, media can only be stored in external store. Something like [[https://github.com/ymirapp/wordpress-plugin][ymir-wp]] or
+    [[https://en-ca.wordpress.org/plugins/ilab-media-tools/][Media Cloud]] or [[https://wordpress.org/plugins/amazon-s3-and-cloudfront/][WP Offload Media Lite]].
 - Links
   - [[https://github.com/mitchmac/ServerlessWP][ServerlessWP]]
   - [[https://blog.ymirapp.com/serverless-wordpress-aws/][Serverless WordPress architecture on AWS | Ymir blog]]
