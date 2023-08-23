@@ -4,9 +4,18 @@ The choice of each of following is upto us and how well the chosen technology su
 - A runtime/environment/platform
 - A webserver/routing (can be nginx/nodejs/python/caddy anything)
 - A php interpreter that the webserver can talk to
-- Wordpress 
 - A database
+- A storage media
+- Wordpress
 
+| Deployment Type | Description                                                                   |
+|-----------------+-------------------------------------------------------------------------------|
+| Classic         | One that is known to all, monolith deployment                                 |
+| WASM            | Wordpress+PHP bundled in wasm as described in [[https://wordpress.github.io/wordpress-playground/][here]]                            |
+| Serverless      | The architecture described [[https://blog.ymirapp.com/serverless-wordpress-aws/][here]], implemented by projects such as [[https://github.com/mitchmac/ServerlessWP][ServerlessWP]] |
+| Transpiled      | Transpile PHP into JS and run it. won't be straightforward either.            |
+
+** Deployments
 Does it run legends:
 - ~Y = Runs~, ~N = Doesn't Run~, ~O = Does't make sense to try~
 - ~X = Does't Run but could run in future~, ~? = Unchecked/Could be~
@@ -20,7 +29,37 @@ Does it run legends:
 | Vercel Serverless F  | N       | ?    | Y          | O          |
 | Vercel Edge F        | N       | ?    | ?          | ?          |
 
-** Table of contents
+*** Serverless
+- WebServer
+  - We don't have a webserver in serverless
+  - Replace webserver w one of Lambda Function URLs/API Gateway/ElasticLB/Other serverless service
+- PHP Runtime + Wordpress
+  - This runs as AWS Lambda/Vercel Serverless Func/Netlify Serverless Func etc.
+  - Eg. PHP runtime: [[https://github.com/brefphp/bref][bref]], [[https://github.com/mitchmac/serverlesswp-node][serverlesswp-node]], [[https://github.com/ymirapp/php-runtime][ymirphp]]
+- Database
+  - Both MySQL and SQLite can be tried, MySQL being more standard. (SQLite passes 99% of the WordPress unit test suite)
+- Links
+  - [[https://github.com/mitchmac/ServerlessWP][ServerlessWP]]
+  - [[https://blog.ymirapp.com/serverless-wordpress-aws/][Serverless WordPress architecture on AWS | Ymir blog]]
+*** WASM
+The WP team [[https://make.wordpress.org/core/2022/09/23/client-side-webassembly-wordpress-with-no-server/][came up]] around september'22, it's pretty neat. [[https://developer.wordpress.org/playground/][Try]] it out, it also has excellent [[https://wordpress.github.io/wordpress-playground/][documentation]]. The current WebAssembly Wordpress setup, in summary:
+- Web server/Routing
+  - Browser: Uses service worker
+  - Node: Uses node-php-wasm bindings
+- PHP Runtime + Wordpress
+  - Runs as a WebAssembly binary [[https://github.com/WordPress/wordpress-playground/blob/trunk/packages/php-wasm/compile/Dockerfile][using php-wasm]] in a [[https://wordpress.github.io/wordpress-playground/architecture/browser-php-worker-threads/][worker thread]]
+  - PHP module has its [[https://wordpress.github.io/wordpress-playground/architecture/wasm-php-filesystem][own filesystem]] separate from your system filesystem.
+  - Browser: Implemented as a JS service worker with [[https://github.com/WordPress/wordpress-playground/tree/trunk/packages/php-wasm/web-service-worker][php-wasm-service-worker]]
+    - Networking is [[https://github.com/WordPress/wordpress-playground/issues/85][not supported yet]]
+  - Node: Implemented as php-wasm [[https://www.npmjs.com/package/@php-wasm/node][@php-wasm/node - npm]]
+    - Async Networking for sync calls supported via [[https://wordpress.github.io/wordpress-playground/architecture/wasm-php-overview][WebSocket to TCP socket proxy, Asyncify and other patches]]
+  - WP is packaged as an optimized [[https://github.com/WordPress/wordpress-playground/tree/trunk/packages/playground/compile-wordpress][build]] bundled for browser
+- Database
+  - Browser: We go with [[https://github.com/WordPress/sqlite-database-integration][SQLite support]]
+    - SQLite passes 99% of the WordPress unit test suite.
+  - Node: It is [[https://wordpress.github.io/wordpress-playground/architecture/wasm-php-overview#networking-support-varies-between-platforms][possible to use MySQL]]
+
+** TOC for Platforms
 - [[#oscontainer][OS/Container]]
 - [[#browser][Browser]]
 - [[#cloudflare][Cloudflare]]
@@ -29,81 +68,52 @@ Does it run legends:
 - [[#aws][AWS]]
 
 ** OS/Container
-*** Classic
-- This has been battle tested
-- This is something that is known to humankind since 2003.
-- This supports every architecture that php supports
-*** WASM
+*** Classic (Y)
+This has been battle tested ever since and it works.
+*** WASM (Y)
+- This can be done as described in [[https://wordpress.github.io/wordpress-playground/][here]]
 ** Browser
-*** Classic
+*** Classic (N)
 - This is not possible because of browser limitations
-*** WASM
-The WP team [[https://make.wordpress.org/core/2022/09/23/client-side-webassembly-wordpress-with-no-server/][came up]] around september'22, it's pretty neat. [[https://developer.wordpress.org/playground/][Try]] it out, it also has excellent [[https://wordpress.github.io/wordpress-playground/][documentation]]. The current WebAssembly Wordpress setup, in summary:
-- PHP
-  - Runs as a WebAssembly binary [[https://github.com/WordPress/wordpress-playground/blob/trunk/packages/php-wasm/compile/Dockerfile][using php-wasm]] in a [[https://wordpress.github.io/wordpress-playground/architecture/browser-php-worker-threads/][worker thread]]
-  - PHP module has its [[https://wordpress.github.io/wordpress-playground/architecture/wasm-php-filesystem][own filesystem]] separate from your system filesystem.
-  - Browser: Implemented as a JS service worker with [[https://github.com/WordPress/wordpress-playground/tree/trunk/packages/php-wasm/web-service-worker][php-wasm-service-worker]]
-    - Networking is [[https://github.com/WordPress/wordpress-playground/issues/85][not supported yet]]
-  - Node: Implemented as php-wasm [[https://www.npmjs.com/package/@php-wasm/node][@php-wasm/node - npm]]
-    - Async Networking for sync calls supported via [[https://wordpress.github.io/wordpress-playground/architecture/wasm-php-overview][WebSocket to TCP socket proxy, Asyncify and other patches]]
-- Wordpress
-  - Optimized [[https://github.com/WordPress/wordpress-playground/tree/trunk/packages/playground/compile-wordpress][build]] bundled for browser
-- DB
-  - Browser: We go with [[https://github.com/WordPress/sqlite-database-integration][SQLite support]]
-    - SQLite passes 99% of the WordPress unit test suite.
-  - Node: It is [[https://wordpress.github.io/wordpress-playground/architecture/wasm-php-overview#networking-support-varies-between-platforms][possible to use MySQL]]
-- Web server/Routing
-  - Browser: Uses service worker
-  - Node: Uses node-php-wasm bindings
+*** WASM (Y)
+- This can be done as described in [[https://wordpress.github.io/wordpress-playground/][here]]
 ** Cloudflare
 This is mostly about CF workers. It is similar to ~Edge functions~ of ~Netlify~ and ~Vercel~. But CF doesn't seem to have a ~Serverless function~ equivalent of them, even though it [[https://www.cloudflare.com/learning/serverless/glossary/serverless-and-cloudflare-workers/][puts itself out]] as a [[https://blog.cloudflare.com/node-js-support-cloudflare-workers/][serverless]] platform.
-*** WASM
+*** WASM (X)
 - Currently this [[https://github.com/WordPress/wordpress-playground/issues/69][doesn't work out]] because of memory constraints.
-*** Classic
+*** Classic (N)
 - Not possible as cloudflare workers does not work like containers
-*** Serverless
-- Since the runtime supports JS, we technically should be able to spawn a php interpreter out of the node application
-- Swpan
-  - Unix spawn
-  - Service bindings
-  - Durable objects
-- There are certain issues about this usecase
-**** Limits
-- Script size
-- Isolation/Sandboxing: Does it allow spawning?
-- Runtime
-  - Only JS and [[https://developers.cloudflare.com/workers/runtime-apis/webassembly/][WASM]]: Other languages [[https://community.cloudflare.com/t/will-cloudflare-support-a-php-runtime-for-workers-at-the-edge/56682/7][need process-level isolation]]
-- Memory
-  - [[https://developers.cloudflare.com/workers/platform/limits/#memory][Limits · Cloudflare Workers docs]]
-*** Transpile
-- If in any case, the main language is not supported we could transpile the language to JS and try running it that way
-- Supported languages that could be transpiled can be [[https://developers.cloudflare.com/workers/learning/languages/#compiled-to-javascript][found here]].
+*** Serverless (?)
+The runtime only runs JS and [[https://developers.cloudflare.com/workers/runtime-apis/webassembly/][WASM]], Other languages [[https://community.cloudflare.com/t/will-cloudflare-support-a-php-runtime-for-workers-at-the-edge/56682/7][need process-level isolation]] so are not supported atm. Since the runtime [[https://blog.cloudflare.com/node-js-support-cloudflare-workers/][supports node]], we technically should be able to spawn a php interpreter out of the node application, but there are few gotchas which most probably will prevent this.
+- [ ] Does the sandboxed environment allow Spawn?
+  - Unix spawn / via Service bindings
+- [ ] Check if the bundle size that is generated by serverlesswp-node is even allowed in CF workers.
+- [ ] If the bundle size is allowed, does the [[https://developers.cloudflare.com/workers/platform/limits/#memory][working memory]] of the process allowed? (Simply PHP)
+- [ ] If the bundle size is allowed, does the working memory of the process allowed? (PHP+WP, only possible if only PHP works out)
+*** Transpile (?)
+- [ ] We can try this but most probaly this won't work out. Supported languages that could be transpiled can be [[https://developers.cloudflare.com/workers/learning/languages/#compiled-to-javascript][found here]].
 ** Netlify
-- They have [[https://docs.netlify.com/functions/overview/][Serverless functions]] and [[https://docs.netlify.com/edge-functions/overview/][Edge Functions]]
+- Netlify has [[https://docs.netlify.com/functions/overview/][Serverless functions]] and [[https://docs.netlify.com/edge-functions/overview/][Edge Functions]]
 - Serverless setup is possible only w Serverless functions
-*** WASM
-- PHP wasm runtime: [[https://github.com/ascorbic/php-edge][ascorbic/php-edge]], this could be extended to run WP
-*** Classic
+- The following *is only for* ~netlify serverless functions~. We're assuming if it works for CF workers, it'll work in edge functions but ~netlify edge functions~ could have different limitations compared to CF workers.
+*** Classic (N)
 - Not possible because no containers
-*** Serverless
+*** WASM (?)
+- PHP wasm runtime: [[https://github.com/ascorbic/php-edge][ascorbic/php-edge]], this could be extended to run WP
+*** Serverless (Y)
 - [[https://github.com/mitchmac/ServerlessWP][ServerlessWP]]
 ** Vercel
 - They have [[https://vercel.com/docs/functions/serverless-functions][Serverless functions]] and [[https://vercel.com/docs/functions/edge-functions][Edge Functions]]
 - Serverless setup is possible only w Serverless functions
-*** Classic
+- The following *is only for* ~vercel serverless functions~. We're assuming if it works for CF workers, it'll work in edge functions but ~vercel edge functions~ could have different limitations compared to CF workers.
+*** Classic(N)
 - Not possible because no containers
-*** WASM
-*** Serverless
+*** WASM (?)
+- Should be possible but haven't checked
+*** Serverless (Y)
 - [[https://github.com/mitchmac/ServerlessWP][ServerlessWP]]
 - PHP runtime: [[https://github.com/vercel-community/php][vercel-community/php]]
 ** AWS
-AWS can ofcourse run OS/Container style wordpress but some notes on serverless wordpress on AWS.
-*** Serverless
+*** Serverless (Y)
 - [[https://github.com/mitchmac/ServerlessWP][ServerlessWP]]
 - [[https://blog.ymirapp.com/serverless-wordpress-aws/][Serverless WordPress architecture on AWS | Ymir blog]]
-  - WebServer
-    - We don't have a webserver in serverless
-    - Replace webserver w one of Lambda Functions/API Gateway/ElasticLB
-  - PHP Runtime + Wordpress
-    - This runs as Lambda
-    - Eg. PHP runtime: [[https://github.com/brefphp/bref][bref]], [[https://github.com/mitchmac/serverlesswp-node][serverlesswp-node]], [[https://github.com/ymirapp/php-runtime][ymirphp]]
